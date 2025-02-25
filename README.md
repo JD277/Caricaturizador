@@ -1,91 +1,95 @@
-# Caricaturizador - Proyecto de Computación Gráfica
+# Caricaturizador
 
 ## Descripción del Proyecto
-Caricaturizador es un software de procesamiento de imágenes que transforma fotografías en caricaturas. Utiliza técnicas de **visión computacional, machine learning y procesamiento de imágenes** para modificar las facciones del rostro, generar efectos estilizados y mejorar la experiencia del usuario con una interfaz interactiva.
+El "Caricaturizador" es un software de procesamiento de imágenes que transforma rostros en caricaturas aplicando técnicas de computación gráfica y aprendizaje profundo. El objetivo del proyecto es desarrollar un sistema capaz de detectar rostros en imágenes, extraer sus características faciales y aplicar transformaciones para darles una apariencia caricaturesca.
 
-El proyecto se desarrolla en Python utilizando librerías como **OpenCV, Dlib, NumPy, Tkinter/PyQt/Kivy, TensorFlow/PyTorch** (según la sección) y herramientas de control de versiones como **Git y GitHub**.
+Este proyecto se inspira en el enfoque de **Cartoon-World** (https://github.com/khaHesham/Cartoon-World/tree/main), el cual utiliza redes neuronales y procesamiento de imágenes para la transformación de rostros en caricaturas. Nuestro sistema integra técnicas como detección de puntos clave faciales y triangulación para lograr el efecto deseado.
 
-## Funcionalidades Generales
-1. **Carga de imagen**: El usuario puede subir una imagen desde su dispositivo.
-2. **Detección de rostro**: Identificación automática de la cara en la imagen.
-3. **Extracción de landmarks faciales**: Obtención de puntos clave del rostro.
-4. **Exageración de rasgos faciales**: Modificación geométrica para resaltar características como ojos, nariz y boca.
-5. **Transformaciones geométricas (Warping)**: Aplicación de técnicas para deformar suavemente el rostro.
-6. **Efectos visuales y postprocesamiento**: Aplicación de filtros para dar un estilo artístico.
-7. **Opción de Deep Learning**: Estilización avanzada mediante redes neuronales.
-8. **Interfaz Gráfica**: Permite la interacción con el usuario y la visualización de los cambios en tiempo real.
-9. **Despliegue y distribución**: Preparación del software para su instalación y uso final.
+## Funcionalidades del Sistema
+El programa se compone de varios módulos que cumplen diferentes funciones en el proceso de caricaturización:
 
-## Secciones del Proyecto y Responsabilidades
-Cada parte del proyecto está dividida en módulos con responsabilidades específicas:
+### 1.1 Carga de imagen
+- Permite al usuario seleccionar una imagen desde su computadora.
+- Convierte la imagen a un formato adecuado para el procesamiento.
 
-### 1.1. Interfaz Gráfica y Diseño de UX/UI
-- Desarrollo de una GUI intuitiva.
-- Integración de botones y opciones.
-- Conexión con el backend para procesamiento.
+### 1.2 Preprocesamiento de la imagen
+- Convierte la imagen a escala de grises.
+- Realiza filtrado y ajuste de brillo/contraste para mejorar la detección.
 
-### 1.2. Preprocesamiento de Imágenes
-- Carga y ajuste de tamaño de imágenes.
-- Conversión a escala de grises si es necesario.
-- Optimización para la detección de rostros.
+### 1.3 Detección de rostros
+- Utiliza modelos de detección facial como **Haar Cascades** para identificar la posición del rostro en la imagen.
 
-### 1.3. Visión Computacional para Detección de Rostros
-- Implementación de detectores con OpenCV/Dlib.
-- Optimización para distintos tipos de imágenes.
+### 1.4 Extracción de características
+- Se identifican puntos clave del rostro utilizando **MediaPipe Face Mesh**.
+- Los puntos detectados servirán para la transformación geométrica de la caricatura.
 
-### 1.4. Extracción de Landmarks Faciales
-- Uso de modelos de predicción para obtener puntos clave.
-- Visualización de los landmarks en la imagen.
+### 1.5 Transformación geométrica
+- Aplica la **triangulación de Delaunay** sobre los puntos clave detectados.
+- Distorsiona la imagen basándose en la información de los puntos faciales.
 
-### 1.5. Análisis y Exageración de Rasgos Faciales
-- Algoritmos matemáticos para modificar proporciones faciales.
-- Control de parámetros para distintos niveles de exageración.
+### 1.6 Warping (Deformación facial)
+Este módulo se encarga de deformar la imagen del rostro aplicando **detección de puntos faciales y distorsión geométrica**.
 
-### 1.6. Transformaciones Geométricas (Warping)
-- Uso de triangulación de Delaunay y TPS para deformar la imagen.
-- Validación de la calidad de la deformación.
+#### Explicación del archivo `Warping.py`
+El archivo **Warping.py** implementa los siguientes procesos:
+1. **Carga de la imagen**: Utiliza `cv.imread()` para leer la imagen y la ajusta a un tamaño fijo.
+2. **Detección de puntos faciales**:
+   - Usa la biblioteca **MediaPipe** para identificar landmarks en el rostro.
+   - Aplica la **triangulación de Delaunay** para crear una malla sobre la cara.
+3. **Detección de rostros**:
+   - Emplea el clasificador `haarcascade_frontalface_default.xml` para encontrar caras.
+   - Dibuja un rectángulo alrededor de las caras detectadas.
+4. **Aplicación de la transformación**:
+   - Se sobrepone la malla de triangulación sobre el rostro detectado.
+   - Se realiza el warping geométrico para exagerar las proporciones de la cara.
 
-### 1.7. Efectos Visuales y Postprocesamiento
-- Aplicación de filtros artísticos para mejorar la apariencia caricaturesca.
+### 1.7 Aplicación de filtros y efectos
+- Se agregan filtros de dibujo para dar un efecto de caricatura a la imagen.
+- Se pueden aplicar distintos estilos según las preferencias del usuario.
 
-### 1.8. Deep Learning para Estilización
-- Uso de modelos preentrenados (CartoonGAN, Style Transfer) para generar caricaturas de alta calidad.
+### 1.8 Generación de la caricatura final
+- Se combinan los efectos aplicados para crear la imagen final en estilo caricaturesco.
 
-### 1.9. Integración
-- Ensamblaje de todos los módulos en un solo flujo de trabajo.
-- Manejo de errores y optimización del rendimiento.
+### 1.9 Interfaz de usuario
+- Se desarrolla una interfaz sencilla para cargar imágenes y visualizar los resultados.
 
-### 1.10. QA, Documentación y Despliegue
-- **Pruebas unitarias y de integración**: Evaluar el funcionamiento de cada módulo.
-- **Documentación**: Creación de informes técnicos y manuales de usuario.
-- **Despliegue del software**: Empaquetado y distribución del programa.
-- **Mantenimiento**: Planificación de mejoras futuras.
+### 1.10 Pruebas y despliegue
+- Se ejecutan pruebas unitarias para verificar la correcta detección y transformación.
+- Se prepara el sistema para su ejecución final y presentación.
 
-## Instalación y Uso
-1. **Clonar el repositorio**:
+## Tecnologías utilizadas
+- **Python**
+- **OpenCV** (Procesamiento de imágenes)
+- **MediaPipe** (Detección de puntos faciales)
+- **Numpy** (Manipulación de datos)
+- **Matplotlib** (Visualización de resultados)
+
+## Instrucciones de uso
+1. Clona el repositorio en tu computadora:
    ```bash
    git clone https://github.com/JD277/Caricaturizador.git
    ```
-2. **Instalar dependencias**:
+2. Instala las dependencias necesarias:
    ```bash
-   pip install -r requirements.txt
+   pip install opencv-python mediapipe numpy matplotlib
    ```
-3. **Ejecutar el programa**:
+3. Ejecuta el programa principal:
    ```bash
    python main.py
    ```
+4. Carga una imagen y observa el resultado de la caricaturización.
 
-## Contribución y Control de Versiones
-Cada miembro del equipo trabaja en una rama independiente y sube sus cambios con mensajes de commit estructurados:
-- **Añadir nuevas funciones**: `Feat(NombreFuncionalidad): descripción breve`
-- **Refactorizar código**: `Refactor(NombreFuncionalidad): descripción breve`
-- **Eliminar código innecesario**: `Delete(NombreFuncionalidad): descripción breve`
-- **Realizar pull request**: `Merge(NombreFuncionalidad): descripción breve`
+## Contribución
+Cada colaborador debe trabajar en su módulo correspondiente y hacer commits siguiendo la estructura:
+- **Nuevo cambio**: `Feat(feature): description`
+- **Refactorización**: `Refactor(feature): description`
+- **Eliminación**: `Delete(feature): description`
+- **Pull Request**: `Merge(feature): description`
 
-## Créditos
-Proyecto desarrollado por estudiantes de la **Universidad de Oriente** de la asignatura **Computación Gráfica**.
-Cada módulo es responsabilidad de un miembro del equipo, asegurando un desarrollo colaborativo y eficiente.
+## Contacto
+Si tienes dudas o sugerencias, abre un issue en el repositorio o contacta al equipo vía GitHub.
 
 ---
-Este documento se irá actualizando conforme avance el proyecto.
+
+**Nota**: Este README es una guía inicial, se recomienda actualizarlo a medida que el proyecto avance y se integren nuevas funcionalidades.
 
