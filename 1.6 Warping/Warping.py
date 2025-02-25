@@ -2,6 +2,7 @@ import numpy as np
 import cv2 as cv
 import matplotlib as plt
 import mediapipe as mp
+import Caricature as car
 from mediapipe import solutions
 from mediapipe.tasks import python as tk
 from mediapipe.tasks.python import vision
@@ -27,6 +28,8 @@ def image_manager( file: str, size = (360,480)):
 
     return new_image
 
+
+
 #Dibuja los puntos que se usarán para la triangulación de Delaunay
 def draw_points(rgb_image: mp.Image, configuration):
     face_landmarks = configuration.face_landmarks
@@ -49,6 +52,24 @@ def draw_points(rgb_image: mp.Image, configuration):
                                                landmark_list= landmark_list,
                                                landmark_drawing_spec= None,
                                                connections= mp_mesh.FACEMESH_TESSELATION,
+                                               connection_drawing_spec=  mp_style.get_default_face_mesh_tesselation_style()
+                                               )
+        solutions.drawing_utils.draw_landmarks(image= image_landmarked,
+                                               landmark_list= landmark_list,
+                                               landmark_drawing_spec= solutions.drawing_utils.DrawingSpec(thickness= 1, circle_radius= 1),
+                                               connections= mp_mesh.FACEMESH_IRISES,
+                                               connection_drawing_spec=  mp_style.get_default_face_mesh_iris_connections_style()
+                                               )
+        solutions.drawing_utils.draw_landmarks(image= image_landmarked,
+                                               landmark_list= landmark_list,
+                                               landmark_drawing_spec= None,
+                                               connections= mp_mesh.FACEMESH_CONTOURS,
+                                               connection_drawing_spec=  mp_style.get_default_face_mesh_contours_style()
+                                               )
+        solutions.drawing_utils.draw_landmarks(image= image_landmarked,
+                                               landmark_list= landmark_list,
+                                               landmark_drawing_spec= None,
+                                               connections= mp_mesh.FACEMESH_NOSE,
                                                connection_drawing_spec=  mp_style.get_default_face_mesh_tesselation_style()
                                                )
     
@@ -88,19 +109,23 @@ def landmark_startup(og: cv.Mat):
 
 
 #Detecta la cara dentro de la imagen dada, para posteriormente poder distorsionarla
-def face_detection(img: cv.Mat) -> cv.Mat:
+def face_detection(img: cv.Mat, caricaturize: bool = False) -> cv.Mat:
     gray_scale = cv.cvtColor(img, cv.COLOR_BGR2GRAY) 
 
     classifier = cv.CascadeClassifier("1.6 Warping/haarcascade_frontalface_default.xml")
     face = classifier.detectMultiScale(gray_scale, minSize= (80,80))
 
-    #Dibuja un rectangulo alrededor de la cara (x/y es el punto izquierdo superior del rectangulo
-    #de las caras encontradas, y h/k es lo que se le suma paa hallar el final/derecho inferior)
     for (x,y,h,k) in face:
-        rect = cv.rectangle(img,( x, y),(x + h, y + k),color= blue)
+        cropped_image = img[y:(y+k),x:(x+h)]
+        
+        cv.rectangle(img, (x,y), (x+h,y+k), color= blue)
 
-    new_image = landmark_startup(img)
-    cv.imshow("Test", new_image)
+    if caricaturize:
+        caricature = car.caricaturize(cropped_image)
+    
+    cv.imshow("crop",caricature)
+    #new_image = landmark_startup(img)
+    #cv.imshow("Test", new_image)
 
 
 
@@ -108,5 +133,5 @@ if __name__ == '__main__':
 
     img = image_manager(path)
 
-    face_detection(img)
+    face_detection(img, True)
     cv.waitKey(0)
