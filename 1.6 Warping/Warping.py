@@ -31,7 +31,7 @@ def image_manager( file: str, size = (360,480)):
 
 
 #Dibuja los puntos que se usarán para la triangulación de Delaunay
-def draw_points(rgb_image: mp.Image, configuration):
+def draw_points(rgb_image: mp.Image, configuration, draw= True):
     face_landmarks = configuration.face_landmarks
     image_landmarked = np.copy(rgb_image)
 
@@ -55,26 +55,26 @@ def draw_points(rgb_image: mp.Image, configuration):
                                                landmark_list= landmark_list,
                                                landmark_drawing_spec= None,
                                                connections= mp_mesh.FACEMESH_TESSELATION,
-                                               connection_drawing_spec=  mp_style.get_default_face_mesh_tesselation_style()
+                                               connection_drawing_spec= mp_style.get_default_face_mesh_tesselation_style()
                                                )
-        solutions.drawing_utils.draw_landmarks(image= image_landmarked,
-                                               landmark_list= landmark_list,
-                                               landmark_drawing_spec= solutions.drawing_utils.DrawingSpec(thickness= 1, circle_radius= 1),
-                                               connections= mp_mesh.FACEMESH_IRISES,
-                                               connection_drawing_spec=  mp_style.get_default_face_mesh_iris_connections_style()
-                                               )
-        solutions.drawing_utils.draw_landmarks(image= image_landmarked,
-                                               landmark_list= landmark_list,
-                                               landmark_drawing_spec= None,
-                                               connections= mp_mesh.FACEMESH_CONTOURS,
-                                               connection_drawing_spec=  mp_style.get_default_face_mesh_contours_style()
-                                               )
-        solutions.drawing_utils.draw_landmarks(image= image_landmarked,
-                                               landmark_list= landmark_list,
-                                               landmark_drawing_spec= None,
-                                               connections= mp_mesh.FACEMESH_NOSE,
-                                               connection_drawing_spec=  mp_style.get_default_face_mesh_tesselation_style()
-                                               )
+        #solutions.drawing_utils.draw_landmarks(image= image_landmarked,
+                                               #landmark_list= landmark_list,
+                                               #landmark_drawing_spec= None,
+                                               #connections= mp_mesh.FACEMESH_IRISES,
+                                               #connection_drawing_spec=  mp_style.get_default_face_mesh_iris_connections_style()
+                                               #)
+        #solutions.drawing_utils.draw_landmarks(image= image_landmarked,
+                                               #landmark_list= landmark_list,
+                                               #landmark_drawing_spec= None,
+                                               #connections= mp_mesh.FACEMESH_CONTOURS,
+                                               #connection_drawing_spec=  mp_style.get_default_face_mesh_contours_style()
+                                               #)
+        #solutions.drawing_utils.draw_landmarks(image= image_landmarked,
+                                               #landmark_list= landmark_list,
+                                               #landmark_drawing_spec= None,
+                                               #connections= mp_mesh.FACEMESH_NOSE,
+                                               #connection_drawing_spec=  mp_style.get_default_face_mesh_tesselation_style()
+                                               #)
     
     return image_landmarked
 
@@ -104,7 +104,7 @@ def landmark_startup(og: cv.Mat):
     image_lm = mp.Image(image_format= mp.ImageFormat.SRGB, data= og)
     detector = mp_lm.detect(image_lm)
 
-    detected_image = draw_points(image_lm.numpy_view(),detector)
+    detected_image = draw_points(image_lm.numpy_view(),detector, False)
     cv.cvtColor(detected_image, cv.COLOR_RGB2BGR)
 
     return detected_image
