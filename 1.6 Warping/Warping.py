@@ -39,15 +39,18 @@ def draw_points(rgb_image: mp.Image, configuration):
     mp_style = solutions.drawing_styles
     mp_mesh = solutions.face_mesh
     
+    #Dibuja los landamarks a cada cara detectada
     for faces in face_landmarks:
         actual_landmark = faces
 
+        #Especificaciones para que el modelo ubique los landmarks
         landmark_list = pb.NormalizedLandmarkList()
         landmark_list.landmark.extend([
             pb.NormalizedLandmark(x= landmark.x, y= landmark.y, z= landmark.z) 
             for landmark in actual_landmark
         ])
-
+        print(pb.NormalizedLandmarkList())
+        #Dibuja los landmarks en las zonas especificadas
         solutions.drawing_utils.draw_landmarks(image= image_landmarked,
                                                landmark_list= landmark_list,
                                                landmark_drawing_spec= None,
@@ -88,7 +91,6 @@ def landmark_startup(og: cv.Mat):
     mp_running_mode = vision.RunningMode
 
     #Configuración para el análisis de las caras (landmark)
-    #TODO: Hacer modificable el número máximo de caras (me da fastidio hacerlo ahora)
     mp_lm_options = vision.FaceLandmarkerOptions(mp_base, num_faces = 5,
                                                 running_mode= mp_running_mode.IMAGE,
                                                 output_face_blendshapes=True,
@@ -109,29 +111,41 @@ def landmark_startup(og: cv.Mat):
 
 
 #Detecta la cara dentro de la imagen dada, para posteriormente poder distorsionarla
-def face_detection(img: cv.Mat, caricaturize: bool = False) -> cv.Mat:
+#y/o darle un efecto de caricatura
+def face_detection(img: cv.Mat, img_blur, img_lsize, img_colork, cartoonish: bool = False) -> cv.Mat:
     gray_scale = cv.cvtColor(img, cv.COLOR_BGR2GRAY) 
+
+    copy_image= img.copy()
 
     classifier = cv.CascadeClassifier("1.6 Warping/haarcascade_frontalface_default.xml")
     face = classifier.detectMultiScale(gray_scale, minSize= (80,80))
 
-    for (x,y,h,k) in face:
-        cropped_image = img[y:(y+k),x:(x+h)]
+    #Crea un rectangulo de identificación para la cara y extrae dicha parte de la imagen
+    if cartoonish:    
+        for (x,y,h,k) in face:
+     
+            #Se crea un arreglo de ceros del mismo tamaño que la imagen original
+            numpy_array = np.zeros(img.shape)
+
+            #Se caricaturiza la imagen original y se toma la sección de la cara
+            #(para usarla como filtro)
+            cartoon = car.cartoonize(img, img_blur, img_colork, img_lsize)
+            cropped_image = cartoon[y:(y+k),x:(x+h)]
+
+            #Se introduce dicha sección en el arreglo (en su posición original) 
+            #para poder realizar operaciones matriciales
+            numpy_array[y:y+k, x: x+ h] = cropped_image
+            numpy_array = numpy_array.astype(np.uint8)
         
-        cv.rectangle(img, (x,y), (x+h,y+k), color= blue)
+        copy_image = cv.addWeighted(copy_image.astype(np.uint8), 0.6, numpy_array, 0.4,0)
+        cv.imshow("Imagen seleccionada",copy_image)
 
-    if caricaturize:
-        caricature = car.caricaturize(cropped_image)
-    
-    cv.imshow("crop",caricature)
-    #new_image = landmark_startup(img)
-    #cv.imshow("Test", new_image)
-
-
+    new_image = landmark_startup(img)
+    cv.imshow("Test", new_image)
 
 if __name__ == '__main__':
 
     img = image_manager(path)
 
-    face_detection(img, True)
+    face_detection(img, 5, 11, 8, True)
     cv.waitKey(0)
