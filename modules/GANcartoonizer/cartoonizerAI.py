@@ -2,8 +2,8 @@ import os
 import cv2
 import numpy as np
 import tensorflow as tf
-from network import unet_generator  
-from guided_filter import guided_filter 
+from modules.GANcartoonizer.network import unet_generator  
+from modules.GANcartoonizer.guided_filter import guided_filter 
 
 class Cartoonizer:
     def __init__(self, model_path="saved_models"):
@@ -67,7 +67,7 @@ class Cartoonizer:
 
 if __name__ == "__main__":
     # Configuración
-    model_path = "modules/saved_models"  # Ruta al modelo entrenado
+    model_path = "modules/GANcartoonizer/saved_models"  # Ruta al modelo entrenado
     input_image = "images/img.jpeg"    # Ruta de la imagen original
     output_image = "images/cartoon.jpg"  # Ruta donde guardar el resultado
 
