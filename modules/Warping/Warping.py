@@ -3,13 +3,14 @@ import cv2 as cv
 import matplotlib as plt
 import mediapipe as mp
 import Caricature as car
+import pandas as pd
 from mediapipe import solutions
 from mediapipe.tasks import python as tk
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2 as pb
 
 blue = (255,0,0)
-path = "Test images/james-person-1.jpg"
+path = "images/james-person-1.jpg"
 
 #Recibe la ruta de una imagen y el tamaño de la misma, devolviendo la imagen leida y modificada
 def image_manager( file: str, size = (360,480)):
@@ -22,13 +23,29 @@ def image_manager( file: str, size = (360,480)):
 
     #Excepción en el caso de que se ingrese un tamaño invalido para la imagen 
     except:
-        print("Upsi dupsi")
+        
         size = (360,480)
         new_image = cv.resize(image,size)
 
     return new_image
 
+#Coloca filtros en la imagen
+def image_filters(path, image: cv.Mat) -> cv.Mat:
 
+    filter = cv.imread(path)
+    pass
+
+
+#Transforma las coordenaas normalizadas de los landmarks en las regulares
+def denormalize(landmarks: list, img_width, img_height):
+
+    coordinates = [(landmark.x, landmark.y, landmark.z) for landmark in landmarks]
+
+    scalar = (img_width, img_height, 1)
+
+    og_coordinates = np.multiply(coordinates,scalar).astype(int)
+
+    return og_coordinates
 
 #Dibuja los puntos que se usarán para la triangulación de Delaunay
 def draw_points(rgb_image: mp.Image, configuration, draw= True):
@@ -39,43 +56,46 @@ def draw_points(rgb_image: mp.Image, configuration, draw= True):
     mp_style = solutions.drawing_styles
     mp_mesh = solutions.face_mesh
     
-    #Dibuja los landamarks a cada cara detectada
+    #Dibuja los landmarks a cada cara detectada
     for faces in face_landmarks:
-        actual_landmark = faces
 
-        #Especificaciones para que el modelo ubique los landmarks
-        landmark_list = pb.NormalizedLandmarkList()
-        landmark_list.landmark.extend([
-            pb.NormalizedLandmark(x= landmark.x, y= landmark.y, z= landmark.z) 
-            for landmark in actual_landmark
-        ])
-        print(pb.NormalizedLandmarkList())
-        #Dibuja los landmarks en las zonas especificadas
-        solutions.drawing_utils.draw_landmarks(image= image_landmarked,
-                                               landmark_list= landmark_list,
-                                               landmark_drawing_spec= None,
-                                               connections= mp_mesh.FACEMESH_TESSELATION,
-                                               connection_drawing_spec= mp_style.get_default_face_mesh_tesselation_style()
-                                               )
-        #solutions.drawing_utils.draw_landmarks(image= image_landmarked,
-                                               #landmark_list= landmark_list,
-                                               #landmark_drawing_spec= None,
-                                               #connections= mp_mesh.FACEMESH_IRISES,
-                                               #connection_drawing_spec=  mp_style.get_default_face_mesh_iris_connections_style()
-                                               #)
-        #solutions.drawing_utils.draw_landmarks(image= image_landmarked,
-                                               #landmark_list= landmark_list,
-                                               #landmark_drawing_spec= None,
-                                               #connections= mp_mesh.FACEMESH_CONTOURS,
-                                               #connection_drawing_spec=  mp_style.get_default_face_mesh_contours_style()
-                                               #)
-        #solutions.drawing_utils.draw_landmarks(image= image_landmarked,
-                                               #landmark_list= landmark_list,
-                                               #landmark_drawing_spec= None,
-                                               #connections= mp_mesh.FACEMESH_NOSE,
-                                               #connection_drawing_spec=  mp_style.get_default_face_mesh_tesselation_style()
-                                               #)
-    
+        actual_landmark = faces
+  
+        if draw:
+
+            #Especificaciones para que el modelo ubique los landmarks
+            landmark_list = pb.NormalizedLandmarkList()
+            landmark_list.landmark.extend([
+                pb.NormalizedLandmark(x= landmark.x, y= landmark.y, z= landmark.z) 
+                for landmark in actual_landmark
+            ])
+
+            #Dibuja los landmarks en las zonas especificadas
+            solutions.drawing_utils.draw_landmarks(image= image_landmarked,
+                                                landmark_list= landmark_list,
+                                                landmark_drawing_spec= None,
+                                                connections= mp_mesh.FACEMESH_TESSELATION,
+                                                connection_drawing_spec= mp_style.get_default_face_mesh_tesselation_style()
+                                                )
+            #solutions.drawing_utils.draw_landmarks(image= image_landmarked,
+                                                #landmark_list= landmark_list,
+                                                #landmark_drawing_spec= None,
+                                                #connections= mp_mesh.FACEMESH_IRISES,
+                                                #connection_drawing_spec=  mp_style.get_default_face_mesh_iris_connections_style()
+                                                #)
+            #solutions.drawing_utils.draw_landmarks(image= image_landmarked,
+                                                #landmark_list= landmark_list,
+                                                #landmark_drawing_spec= None,
+                                                #connections= mp_mesh.FACEMESH_CONTOURS,
+                                                #connection_drawing_spec=  mp_style.get_default_face_mesh_contours_style()
+                                                #)
+            #solutions.drawing_utils.draw_landmarks(image= image_landmarked,
+                                                #landmark_list= landmark_list,
+                                                #landmark_drawing_spec= None,
+                                                #connections= mp_mesh.FACEMESH_NOSE,
+                                                #connection_drawing_spec=  mp_style.get_default_face_mesh_tesselation_style()
+                                                #)
+        
     return image_landmarked
 
 
@@ -84,7 +104,7 @@ def draw_points(rgb_image: mp.Image, configuration, draw= True):
 # y crea un landmark (como un análisis de las caras)
 def landmark_startup(og: cv.Mat):
 
-    model = "1.6 Warping/face_landmarker.task"
+    model = "modules/Warping/face_landmarker.task"
 
     #Variables que se utilizan para asignarle a la configuración del landmark
     mp_base = tk.BaseOptions(model_asset_path= model)
@@ -102,9 +122,9 @@ def landmark_startup(og: cv.Mat):
     #Cambia el formato de la imagen a uno compatible para el "detect" (de BGR A RGB)
     #y, posteriormente, detecta el landmark de la imagen dada
     image_lm = mp.Image(image_format= mp.ImageFormat.SRGB, data= og)
-    detector = mp_lm.detect(image_lm)
+    results = mp_lm.detect(image_lm)
 
-    detected_image = draw_points(image_lm.numpy_view(),detector, False)
+    detected_image = draw_points(image_lm.numpy_view(),results, False)
     cv.cvtColor(detected_image, cv.COLOR_RGB2BGR)
 
     return detected_image
@@ -117,7 +137,8 @@ def face_detection(img: cv.Mat, img_blur, img_lsize, img_colork, cartoonish: boo
 
     copy_image= img.copy()
 
-    classifier = cv.CascadeClassifier("1.6 Warping/haarcascade_frontalface_default.xml")
+    #Detecta el area de la cara
+    classifier = cv.CascadeClassifier("modules/Warping/haarcascade_frontalface_default.xml")
     face = classifier.detectMultiScale(gray_scale, minSize= (80,80))
 
     #Crea un rectangulo de identificación para la cara y extrae dicha parte de la imagen
@@ -129,6 +150,7 @@ def face_detection(img: cv.Mat, img_blur, img_lsize, img_colork, cartoonish: boo
 
             #Se caricaturiza la imagen original y se toma la sección de la cara
             #(para usarla como filtro)
+
             cartoon = car.cartoonize(img, img_blur, img_colork, img_lsize)
             cropped_image = cartoon[y:(y+k),x:(x+h)]
 
