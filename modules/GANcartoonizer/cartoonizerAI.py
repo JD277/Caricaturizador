@@ -62,15 +62,15 @@ class Cartoonizer:
         # Guardar resultado
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         cv2.imwrite(output_path, output)
-        print(f"Imagen guardada en: {output_path}")
+        #print(f"Imagen guardada en: {output_path}")
 
 
-if __name__ == "__main__":
-    # Configuración
-    model_path = "modules/GANcartoonizer/saved_models"  # Ruta al modelo entrenado
-    input_image = "images/img.jpeg"    # Ruta de la imagen original
-    output_image = "images/cartoon.jpg"  # Ruta donde guardar el resultado
+# if __name__ == "__main__":
+#     # Configuración
+#     model_path = "modules/GANcartoonizer/saved_models"  # Ruta al modelo entrenado
+#     input_image = "images/img.jpeg"    # Ruta de la imagen original
+#     output_image = "images/cartoon.jpg"  # Ruta donde guardar el resultado
 
-    # Crear instancia y procesar
-    cartoonizer = Cartoonizer(model_path)
-    cartoonizer.cartoonize(input_image, output_image)
+#     # Crear instancia y procesar
+#     cartoonizer = Cartoonizer(model_path)
+#     cartoonizer.cartoonize(input_image, output_image)
