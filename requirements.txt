@@ -151,4 +151,5 @@ numpy
 tensorflow
 tf_slim
 tqdm
+streamlit
 >>>>>>> origin/master
