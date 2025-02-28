@@ -3,9 +3,10 @@
 import cv2
 import numpy as np
 from modules.visualeffects.visual_effects import aplicar_filtros_artisticos, estilizar_imagen
-
-def main():
-    ruta_imagen = 'prueba.jpg'  # Si quieres realizar pruebas, coloca tu imagen en la raíz del proyecto.
+from datetime import datetime
+import os
+def apply_effects(image, output_path):
+    ruta_imagen = image  # Si quieres realizar pruebas, coloca tu imagen en la raíz del proyecto.
     imagen = cv2.imread(ruta_imagen)
 
     if imagen is None:
@@ -14,14 +15,6 @@ def main():
 
     suavizada, bordes = aplicar_filtros_artisticos(imagen)
     cartoon = estilizar_imagen(imagen, suavizada, bordes)
-
-    cv2.imshow('Original', imagen)
-    cv2.imshow('Caricatura', cartoon)
-    cv2.imwrite('caricatura.jpg', cartoon)
-
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-
-if __name__ == "__main__":
-    main()
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    cv2.imwrite(output_path, cartoon)
+    return output_path

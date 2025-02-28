@@ -2,17 +2,17 @@ import numpy as np
 import cv2 as cv
 import matplotlib as plt
 import mediapipe as mp
-import Caricature as car
+import modules.Warping.Caricature as car
 import pandas as pd
 from mediapipe import solutions
 from mediapipe.tasks import python as tk
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2 as pb
-
+import os
 blue = (255,0,0)
 
 
-#Recibe la ruta de una imagen y el tamaño de la misma, devolviendo la imagen leida y modificada
+# Recibe la ruta de una imagen y el tamaño de la misma, devolviendo la imagen leida y modificada
 def image_manager( file: str, size = (360,480)):
 
     image = cv.imread(file)
@@ -21,24 +21,24 @@ def image_manager( file: str, size = (360,480)):
     try:
         new_image = cv.resize(image,size)
 
-    #Excepción en el caso de que se ingrese un tamaño invalido para la imagen 
+    # Excepción en el caso de que se ingrese un tamaño invalido para la imagen 
     except:
         
         size = (360,480)
         new_image = cv.resize(image,size)
+    old_size = image.shape[:2]
+    return [new_image, old_size]
 
-    return new_image
-
-#Dibuja los puntos que se usarán para la triangulación de Delaunay
+# Dibuja los puntos que se usarán para la triangulación de Delaunay
 def draw_points(rgb_image: mp.Image, configuration, draw_face= True, draw_eyes_mouth= True, draw_iris= True, draw_nose= True):
     face_landmarks = configuration.face_landmarks
     image_landmarked = np.copy(rgb_image)
 
-    #Variables para asignar fácilmente las especificaciones al dibujo de landmarks
+    # Variables para asignar fácilmente las especificaciones al dibujo de landmarks
     mp_style = solutions.drawing_styles
     mp_mesh = solutions.face_mesh
     
-    #Dibuja los landmarks a cada cara detectada
+    # Dibuja los landmarks a cada cara detectada
     for faces in face_landmarks:
 
         actual_landmark = faces
@@ -59,7 +59,7 @@ def draw_points(rgb_image: mp.Image, configuration, draw_face= True, draw_eyes_m
                                                     connections= mp_mesh.FACEMESH_TESSELATION,
                                                     connection_drawing_spec= mp_style.get_default_face_mesh_tesselation_style()
                                                     )
-        #Dibuja las pupilas
+        # Dibuja las pupilas
         if draw_iris:
             solutions.drawing_utils.draw_landmarks(image= image_landmarked,
                                                 landmark_list= landmark_list,
@@ -67,7 +67,7 @@ def draw_points(rgb_image: mp.Image, configuration, draw_face= True, draw_eyes_m
                                                 connections= mp_mesh.FACEMESH_IRISES,
                                                 connection_drawing_spec=  mp_style.get_default_face_mesh_iris_connections_style()
                                                 )
-        #dibuja los ojos y boca
+        # dibuja los ojos y boca
         if draw_eyes_mouth:
             solutions.drawing_utils.draw_landmarks(image= image_landmarked,
                                                 landmark_list= landmark_list,
@@ -76,7 +76,7 @@ def draw_points(rgb_image: mp.Image, configuration, draw_face= True, draw_eyes_m
                                                 connection_drawing_spec=  mp_style.get_default_face_mesh_contours_style()
                                                 )
         
-        #Dibuja la nariz
+        # Dibuja la nariz
         if draw_nose:
             solutions.drawing_utils.draw_landmarks(image= image_landmarked,
                                                 landmark_list= landmark_list,
@@ -89,27 +89,27 @@ def draw_points(rgb_image: mp.Image, configuration, draw_face= True, draw_eyes_m
 
 
 
-#Recibe la imagen que se utilizará para el warping, 
+# Recibe la imagen que se utilizará para el warping, 
 # y crea un landmark (como un análisis de las caras)
 def landmark_startup(og: cv.Mat, face: bool, eyes: bool, iris: bool, nose: bool):
 
     model = "modules/Warping/face_landmarker.task"
 
-    #Variables que se utilizan para asignarle a la configuración del landmark
+    # Variables que se utilizan para asignarle a la configuración del landmark
     mp_base = tk.BaseOptions(model_asset_path= model)
     mp_running_mode = vision.RunningMode
 
-    #Configuración para el análisis de las caras (landmark)
+    # Configuración para el análisis de las caras (landmark)
     mp_lm_options = vision.FaceLandmarkerOptions(mp_base, num_faces = 5,
                                                 running_mode= mp_running_mode.IMAGE,
                                                 output_face_blendshapes=True,
                                                 output_facial_transformation_matrixes=True)
 
-    #Crea el landmark a partir de la configuración anterior
+    # Crea el landmark a partir de la configuración anterior
     mp_lm = vision.FaceLandmarker.create_from_options(mp_lm_options)
 
-    #Cambia el formato de la imagen a uno compatible para el "detect" (de BGR A RGB)
-    #y, posteriormente, detecta el landmark de la imagen dada
+    # Cambia el formato de la imagen a uno compatible para el "detect" (de BGR A RGB)
+    # y, posteriormente, detecta el landmark de la imagen dada
     image_lm = mp.Image(image_format= mp.ImageFormat.SRGB, data= og)
     results = mp_lm.detect(image_lm)
 
@@ -119,8 +119,8 @@ def landmark_startup(og: cv.Mat, face: bool, eyes: bool, iris: bool, nose: bool)
     return detected_image
 
 
-#Detecta la cara dentro de la imagen dada, para darle un efecto de caricatura.
-#En caso de que no se quiera una caricatura, devuelve la imagen regular
+# Detecta la cara dentro de la imagen dada, para darle un efecto de caricatura.
+# En caso de que no se quiera una caricatura, devuelve la imagen regular
 def face_detection(img: cv.Mat, img_blur, img_lsize, img_colork, cartoonish: bool = False) -> cv.Mat:
     gray_scale = cv.cvtColor(img, cv.COLOR_BGR2GRAY) 
 
@@ -129,7 +129,7 @@ def face_detection(img: cv.Mat, img_blur, img_lsize, img_colork, cartoonish: boo
     #Detecta el area de la cara
     classifier = cv.CascadeClassifier("modules/Warping/haarcascade_frontalface_default.xml")
     face = classifier.detectMultiScale(gray_scale, minSize= (80,80))
-
+    numpy_array = None
     #Crea un rectangulo de identificación para la cara y extrae dicha parte de la imagen
     if cartoonish:    
         for (x,y,h,k) in face:
@@ -153,3 +153,13 @@ def face_detection(img: cv.Mat, img_blur, img_lsize, img_colork, cartoonish: boo
         return copy_image
 
     return img
+
+# Colocando todo el proceso junto para integrarlo a la interfaz
+def warping_mediapipe(img_input:str, output_path,size = (360,480), blur= 5, colors= 8,img_lsize = 11, cartoonish = True):
+    img = image_manager(img_input)
+    landmarked_image = landmark_startup(img[0], False, False, False, False)
+    warped_image = face_detection(landmarked_image, blur, img_lsize, colors, cartoonish)
+    resized_image = cv.resize(warped_image,(img[1][1],img[1][0]))
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    cv.imwrite(output_path, resized_image)
+    return output_path

@@ -19,10 +19,12 @@ def mostrar_progreso(progress_bar):
         time.sleep(0.01)
         progress_bar.progress(percent_complete + 1)
 
-# Método Clásico 
-def metodo_clasico(imagen):
+# Warping con Mediapipe 
+def warping_con_mediapipe(imagen):
     # Aqui va el codigo para esta funcion
-    return imagen
+    img_name = f"images/cartoon{datetime.now()}.jpg"
+    warping_mediapipe(imagen,img_name)
+    return img_name
 
 # Método de Deep Learning 
 def metodo_deep_learning(imagen):
@@ -36,10 +38,15 @@ def caricaturizar_imagen(imagen, metodo):
     progress_bar = st.progress(0)   
     mostrar_progreso(progress_bar) 
 
-    if metodo == 'Método Clásico':
-        return metodo_clasico(imagen)
-    elif metodo == 'Deep Learning':
+    if metodo == 'Warping con Mediapipe':
+        return warping_con_mediapipe(imagen)
+    
+    elif metodo == 'AI':
         return metodo_deep_learning(imagen)
+    
+    elif metodo == 'Realista simple':
+        mostrar_progreso(progress_bar)
+        return apply_effects(imagen,f"images/cartoon{datetime.now()}.jpg")
 
 # Función para limpiar el directorio 'images'
 def limpiar_directorio_images():
@@ -109,6 +116,7 @@ def interfaz_caricaturizador():
             imagen_original = Image.open(st.session_state.file)
             st.session_state.imagen_cargada = imagen_original
             st.session_state.imagen_caricaturizada = None
+            os.makedirs("images", exist_ok=True)
             file_path = os.path.join("images", st.session_state.file.name)
             with open(file_path, "wb") as f:
                 f.write(st.session_state.file.getbuffer())
@@ -118,7 +126,7 @@ def interfaz_caricaturizador():
         st.info('Por favor, sube un archivo de imagen.')
 
     # Selección del método de caricaturización
-    metodo = st.selectbox('Elige un método:', ['Método Clásico', 'Deep Learning'])
+    metodo = st.selectbox('Elige un método:', ['Warping con Mediapipe', 'AI', 'Realista simple'])
 
     if st.session_state.imagen_cargada is not None:
         col1, col2 = st.columns(2)
@@ -130,12 +138,12 @@ def interfaz_caricaturizador():
 
         # Botón para caricaturizar la imagen
         if st.button('Caricaturizar imagen'):
-            try:
+            # try:
                 imagen_caricaturizada = caricaturizar_imagen(os.path.join("images",st.session_state.file.name), metodo)
                 st.session_state.imagen_caricaturizada = Image.open(imagen_caricaturizada)
                 st.success('¡Imagen caricaturizada con exito!')
-            except Exception as e:
-                st.error(f'Error al caricaturizar la imagen: {e}')
+            # except Exception as e:
+                # st.error(f'Error al caricaturizar la imagen: {e}')
 
         with col2:
             if st.session_state.imagen_caricaturizada is not None:
@@ -143,25 +151,6 @@ def interfaz_caricaturizador():
                 st.image(st.session_state.imagen_caricaturizada, caption='Imagen Caricaturizada', use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
 
-        # Botón para borrar la imagen
-        if st.button('Borrar imagen'):
-            st.session_state.mostrar_confirmacion = True
-
-        # Confirmación de borrado
-        if st.session_state.mostrar_confirmacion:
-            st.write('¿Estás seguro de que deseas borrar la imagen?')
-            col1, col2 = st.columns(2)
-            if col1.button('Sí'):
-                imagen_original = None
-                st.session_state.imagen_cargada = None
-                imagen_caricaturizada = None
-                st.session_state.imagen_caricaturizada = None
-                st.session_state.mostrar_confirmacion = False
-                limpiar_directorio_images()
-                st.success('Imagen borrada con éxito.')
-            if col2.button('No'):
-                st.session_state.mostrar_confirmacion = False
-                st.info('Operación cancelada. La imagen no ha sido borrada.')
 
         # Botón de descarga
         if st.session_state.imagen_caricaturizada is not None:

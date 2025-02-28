@@ -2,8 +2,8 @@ import numpy as np
 import cv2 as cv
 
 
-#Convierte la imagen a gris, la difumina (blur) y le saca los bordes 
-#(El blur debe tener un valor positivo e impar)
+# Convierte la imagen a gris, la difumina (blur) y le saca los bordes 
+# (El blur debe tener un valor positivo e impar)
 def edge_detection(img,blur= 5, line_size= 5):
     grayscale = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
@@ -13,8 +13,8 @@ def edge_detection(img,blur= 5, line_size= 5):
 
     return edges
 
-#Segmenta los colores de la imagen, y devuelve una versión caricaturizada con la cantidad de colores
-#especificados
+# Segmenta los colores de la imagen, y devuelve una versión caricaturizada con la cantidad de colores
+# especificados
 def color_segmentation(img, colors= 8, iterations= 20):
     bgr_to_rgb = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
@@ -23,7 +23,7 @@ def color_segmentation(img, colors= 8, iterations= 20):
     np_array = np.float32(bgr_to_rgb)
     np_array = np_array.reshape((-1,3))
 
-    #Especificaciones para terminar el proceso de clustering en la imagen
+    # Especificaciones para terminar el proceso de clustering en la imagen
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, iterations, 0.02)
 
 
@@ -33,9 +33,9 @@ def color_segmentation(img, colors= 8, iterations= 20):
     
     return result_image
 
-#Caricaturiza la imagen. Recibe de parámetros: una imagen, el blur (determina que tan clara se ve la imagen
-#y debe ser impar), numero de colores que se utilizaran en el proceso y el tamaño de la linea usado al
-#caricaturizar
+# Caricaturiza la imagen. Recibe de parámetros: una imagen, el blur (determina que tan clara se ve la imagen
+# y debe ser impar), numero de colores que se utilizaran en el proceso y el tamaño de la linea usado al
+# caricaturizar
 def cartoonize(img: cv.Mat, BLUR= 5, COLORS= 8, SIZE= 11):
     
     img_edges = edge_detection(img, BLUR, SIZE)
