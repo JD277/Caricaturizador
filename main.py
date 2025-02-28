@@ -8,6 +8,10 @@ def initialize_state():
         st.session_state.imagen_caricaturizada = None
     if 'mostrar_confirmacion' not in st.session_state:
         st.session_state.mostrar_confirmacion = False
+    if 'file' not in st.session_state:
+        st.session_state.file = None
+    if 'reiniciar' not in st.session_state:
+        st.session_state.reiniciar = False
 
 # Barra de progreso
 def mostrar_progreso(progress_bar):
@@ -25,8 +29,7 @@ def metodo_deep_learning(imagen):
     # Aquí va el codigo para esta funcion
     img_name = f"images/cartoon{datetime.now()}.jpg"
     cartoonizer.cartoonize(imagen, img_name)
-    outputimg = Image.open(img_name)
-    return outputimg
+    return img_name
 
 # Función para seleccionar y aplicar el método de caricaturización
 def caricaturizar_imagen(imagen, metodo):
@@ -54,10 +57,8 @@ def limpiar_directorio_images():
 def limpiar_todo():
     # Limpiar el directorio 'images'
     limpiar_directorio_images()
-    
-    # Restablecer el estado de la aplicación
-    st.session_state.imagen_cargada = None
-    st.session_state.imagen_caricaturizada = None
+    st.session_state.reiniciar = True
+
     # st.success("Directorio 'images' limpiado y estado restablecido.")
 
 # Función principal para la interfaz del caricaturizador
@@ -101,16 +102,16 @@ def interfaz_caricaturizador():
     initialize_state()
 
     # Cargar imagen desde el sistema del usuario
-    uploaded_file = st.file_uploader('Arrastra y suelta una imagen aquí', type=['jpg', 'png', 'jpeg'])
-
-    if uploaded_file is not None:
+    st.session_state.file = st.file_uploader('Arrastra y suelta una imagen aquí', type=['jpg', 'png', 'jpeg'])
+   
+    if st.session_state.file is not None:
         try:
-            imagen_original = Image.open(uploaded_file)
+            imagen_original = Image.open(st.session_state.file)
             st.session_state.imagen_cargada = imagen_original
             st.session_state.imagen_caricaturizada = None
-            file_path = os.path.join("images", uploaded_file.name)
+            file_path = os.path.join("images", st.session_state.file.name)
             with open(file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
+                f.write(st.session_state.file.getbuffer())
         except Exception as e:
             st.error(f'Error al cargar la imagen: {e}. Por favor, sube un archivo de imagen válido (JPG, PNG, JPEG).')
     else:
@@ -130,8 +131,8 @@ def interfaz_caricaturizador():
         # Botón para caricaturizar la imagen
         if st.button('Caricaturizar imagen'):
             try:
-                imagen_caricaturizada = caricaturizar_imagen(os.path.join("images",uploaded_file.name), metodo)
-                st.session_state.imagen_caricaturizada = imagen_caricaturizada
+                imagen_caricaturizada = caricaturizar_imagen(os.path.join("images",st.session_state.file.name), metodo)
+                st.session_state.imagen_caricaturizada = Image.open(imagen_caricaturizada)
                 st.success('¡Imagen caricaturizada con exito!')
             except Exception as e:
                 st.error(f'Error al caricaturizar la imagen: {e}')
@@ -164,21 +165,26 @@ def interfaz_caricaturizador():
 
         # Botón de descarga
         if st.session_state.imagen_caricaturizada is not None:
-            try:
-                buffered = io.BytesIO()
-                st.session_state.imagen_caricaturizada.save(buffered, format="PNG")
-                st.download_button(
-                    label="Descargar Imagen",
-                    data=buffered.getvalue(),
-                    file_name="caricatura.png",
-                    mime="image/png",
-                    on_click=lambda: limpiar_todo()
-                )
-            except Exception as e:
-                # Restablecer el estado de la aplicación
-                st.session_state.imagen_cargada = None
-                st.session_state.imagen_caricaturizada = None
-                pass
+            buffered = io.BytesIO()
+            st.session_state.imagen_caricaturizada.save(buffered, format="PNG")
+            st.download_button(
+                label="Descargar Imagen",
+                data=buffered.getvalue(),
+                file_name="caricatura.png",
+                mime="image/png",
+                on_click=lambda: limpiar_todo()
+            )
+        if st.session_state.reiniciar:
+            # Restablecer el estado de la aplicación
+            st.session_state.imagen_cargada = None
+            st.session_state.imagen_caricaturizada = None
+            st.session_state.file = None
+            imagen_original = None
+            st.session_state.reiniciar = False
+
+            # Forzar re-renderizado
+            st.rerun()
+            
 
 # Ejecutar la interfaz del caricaturizador
 interfaz_caricaturizador()
