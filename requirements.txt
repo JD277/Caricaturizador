@@ -152,4 +152,5 @@ tensorflow
 tf_slim
 tqdm
 streamlit
+dlib
 >>>>>>> origin/master
