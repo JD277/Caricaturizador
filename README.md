@@ -12,30 +12,39 @@ El programa se compone de varios módulos, cada uno con una función específica
 
 ### 1. Carga y Preprocesamiento de Imágenes
 - Permite al usuario seleccionar una imagen desde su computadora.
-- Convierte la imagen a un formato adecuado para el procesamiento.
-- Ajusta la iluminación y normaliza la imagen para mejorar la detección facial.
+- Convierte la imagen a escala de grises y la normaliza si es necesario.
+- Ajusta el tamaño de la imagen para un procesamiento más eficiente.
 
-### 2. Detección de Rostros y Características Faciales
-- Utiliza modelos de detección facial como Haar Cascades o Dlib para identificar la posición del rostro en la imagen.
-- Extrae puntos clave faciales utilizando MediaPipe Face Mesh.
-- Los puntos detectados servirán para la transformación geométrica de la caricatura.
+### 2. Detección de Rostros
+- Emplea OpenCV o Dlib para detectar rostros en la imagen.
+- Extrae la región de interés (ROI) correspondiente al rostro detectado.
 
-### 3. Transformaciones Geométricas (Warping)
-- Aplica la triangulación de Delaunay sobre los puntos clave detectados.
-- Distorsiona la imagen basándose en la información de los puntos faciales.
-- Se encarga de deformar la imagen del rostro aplicando detección de puntos faciales y distorsión geométrica.
+### 3. Extracción de Landmarks Faciales
+- Usa el predictor de 68 puntos faciales de Dlib para identificar las características clave del rostro.
 
-### 4. Aplicación de Filtros y Estilización
-- Se agregan filtros de dibujo para dar un efecto de caricatura a la imagen.
-- Se pueden aplicar distintos estilos según las preferencias del usuario, incluyendo enfoques basados en redes neuronales.
+### 4. Exageración de Rasgos
+- Modifica las coordenadas de los landmarks para enfatizar características distintivas como ojos, nariz y boca.
 
-### 5. Interfaz de Usuario
-- Se desarrolla una interfaz sencilla para cargar imágenes y visualizar los resultados.
-- Permite seleccionar entre distintos estilos de caricatura.
+### 5. Transformaciones Geométricas
+- Aplica triangulación de Delaunay y técnicas de warping para modificar la imagen basada en los landmarks ajustados.
 
-### 6. Pruebas y Despliegue
+### 6. Aplicación de Efectos Visuales
+- Utiliza filtros artísticos para dar un acabado más caricaturesco.
+- Ajusta el color y los bordes para resaltar la transformación.
+
+### 7. Estilización con Deep Learning
+- Permite la opción de aplicar modelos como CartoonGAN para una caricaturización más avanzada.
+
+### 8. Pruebas y Despliegue
 - Se ejecutan pruebas unitarias para verificar la correcta detección y transformación.
 - Se prepara el sistema para su ejecución final y presentación.
+
+## Instalación y Uso
+
+### Requisitos Previos
+- Python 3.9 o superior
+- Dependencias listadas en `requirements.txt`
+
 
 ## Tecnologías Utilizadas
 - **Python**
@@ -85,6 +94,9 @@ Feat(deteccion_rostros): Implementación de MediaPipe para detección de puntos 
 
 ## Contacto
 Si tienes dudas o sugerencias, abre un issue en el repositorio o contacta al equipo vía GitHub.
+
+## Documentación y Soporte
+Para detalles técnicos, revisa `DOCUMENTATION.md`. Para soporte, abre un issue en el repositorio.
 
 **Nota:** Este README es una guía inicial, se recomienda actualizarlo a medida que el proyecto avance y se integren nuevas funcionalidades.
 
