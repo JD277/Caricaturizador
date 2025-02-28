@@ -54,15 +54,25 @@ Verificar que:
 
 ---
 
+### 1.4 Pruebas de Integración
+Validar la comunicación entre los módulos clave ejecutando `integration_tests.py`.
+```bash
+python integration_tests.py
+```
+
 ## 2. Documentación Técnica
 
 ### **2.1 Descripción de los Módulos**
 
-El proyecto está compuesto por los siguientes módulos:
+Este proyecto sigue una arquitectura modular. Cada módulo tiene funciones específicas:
+- `preprocessing.py`: Procesamiento de imágenes.
+- `face_detection.py`: Detección de rostros.
+- `landmarks.py`: Extracción de puntos faciales.
+- `warp.py`: Transformaciones geométricas.
+- `effects.py`: Filtros artísticos y ajustes visuales.
+- `deep_learning.py`: Implementación de redes neuronales para estilización.
+- `gui.py`: Interfaz gráfica con PyQt.
 
-- ``: Se encarga de detectar los rostros en la imagen de entrada utilizando OpenCV.
-- ``: Aplica efectos de caricaturización mediante filtros bilaterales y detección de bordes con Canny.
-- ``: Punto de entrada principal del programa, gestiona la entrada y salida de datos.
 
 ### **2.2 Algoritmos Utilizados**
 
@@ -94,6 +104,12 @@ pip install -r requirements.txt
 python main.py --input imagen.jpg
 ```
 
+El usuario debe:
+1. Ejecutar `python main.py`.
+2. Cargar una imagen desde su equipo.
+3. Elegir el método de caricaturización (clásico o deep learning).
+4. Guardar el resultado.
+
 ### **3.2 Resolución de Problemas Comunes**
 
 - **Error: No se detectan rostros.**
@@ -103,50 +119,22 @@ python main.py --input imagen.jpg
 
 ---
 
-## 4. Despliegue del Sistema
+## 4. Despliegue
 
-El objetivo del despliegue es ejecutar el programa en un servidor en lugar de solo en local.
-
-### **4.1 Instalación de Dependencias**
-
-Si el proyecto se ejecuta en un servidor nuevo, instalar las dependencias:
-
+### 4.1 Creación de un Ejecutable
+Se recomienda `PyInstaller` para generar un `.exe` en Windows.
 ```bash
-pip install -r requirements.txt
+pyinstaller --onefile --windowed main.py
 ```
 
-### **4.2 Ejecución en un Servidor**
-
-Para correr el sistema en un servidor Linux:
-
+### 4.2 Despliegue en Web
+El proyecto puede adaptarse a `Streamlit` para correr en web:
 ```bash
-nohup python main.py --input imagen.jpg &
+streamlit run app.py
 ```
 
-Esto permite que la ejecución continúe en segundo plano.
+Con estos pasos, se asegura un correcto funcionamiento del sistema.
 
-### **4.3 Opcional: Servir la Aplicación como una API**
-
-Si se quiere exponer el servicio a través de una API con Flask:
-
-```bash
-export FLASK_APP=app.py
-flask run --host=0.0.0.0 --port=5000
-```
-
-Esto permitirá acceder al servicio desde un navegador o cliente HTTP.
-
-### **4.4 Opcional: Empaquetado en un Ejecutable**
-
-Para distribuir el programa como un ejecutable:
-
-```bash
-pyinstaller --onefile main.py
-```
-
-El archivo ejecutable generado estará en la carpeta `dist/`.
-
----
 
 ## 5. Mantenimiento y Soporte
 
