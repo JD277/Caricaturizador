@@ -19,3 +19,6 @@ from modules.visualeffects.applyVisualeffects import apply_effects
 
 # Warping MP stuff
 from modules.Warping.Warping import warping_mediapipe
+
+# Warping Dlib stuff
+from modules.Warping.Warping import warping_dlib

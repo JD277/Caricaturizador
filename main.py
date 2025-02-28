@@ -19,7 +19,7 @@ def mostrar_progreso(progress_bar):
         time.sleep(0.01)
         progress_bar.progress(percent_complete + 1)
 
-# Warping con Mediapipe 
+# Caricaturización con Mediapipe 
 def warping_con_mediapipe(imagen):
     # Aqui va el codigo para esta funcion
     img_name = f"images/cartoon{datetime.now()}.jpg"
@@ -38,9 +38,10 @@ def caricaturizar_imagen(imagen, metodo):
     progress_bar = st.progress(0)   
     mostrar_progreso(progress_bar) 
 
-    if metodo == 'Warping con Mediapipe':
+    if metodo == 'Caricaturización con Mediapipe':
         return warping_con_mediapipe(imagen)
-    
+    elif metodo == 'Caricaturización con Dlib':
+        return warping_dlib(imagen, f"images/cartoon{datetime.now()}.jpg")
     elif metodo == 'AI':
         return metodo_deep_learning(imagen)
     
@@ -126,7 +127,7 @@ def interfaz_caricaturizador():
         st.info('Por favor, sube un archivo de imagen.')
 
     # Selección del método de caricaturización
-    metodo = st.selectbox('Elige un método:', ['Warping con Mediapipe', 'AI', 'Realista simple'])
+    metodo = st.selectbox('Elige un método:', ['Caricaturización con Mediapipe', 'Caricaturización con Dlib', 'AI', 'Realista simple'])
 
     if st.session_state.imagen_cargada is not None:
         col1, col2 = st.columns(2)

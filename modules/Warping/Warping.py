@@ -2,13 +2,14 @@ import numpy as np
 import cv2 as cv
 import matplotlib as plt
 import mediapipe as mp
-import modules.Warping.Caricature as car
+import os
 import pandas as pd
 from mediapipe import solutions
+import modules.Warping.Caricature as car
 from mediapipe.tasks import python as tk
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2 as pb
-import os
+from modules.Landmarks.Landmarks import extract_landmarks_dlib
 blue = (255,0,0)
 
 
@@ -50,7 +51,7 @@ def draw_points(rgb_image: mp.Image, configuration, draw_face= True, draw_eyes_m
             for landmark in actual_landmark
         ])
 
-        #Dibuja los landmarks en las zonas especificadas
+        # Dibuja los landmarks en las zonas especificadas
         if draw_face:
             #Dibuja los landmarks de la cara
             solutions.drawing_utils.draw_landmarks(image= image_landmarked,
@@ -130,21 +131,21 @@ def face_detection(img: cv.Mat, img_blur, img_lsize, img_colork, cartoonish: boo
     classifier = cv.CascadeClassifier("modules/Warping/haarcascade_frontalface_default.xml")
     face = classifier.detectMultiScale(gray_scale, minSize= (80,80))
     numpy_array = None
-    #Crea un rectangulo de identificación para la cara y extrae dicha parte de la imagen
+    # Crea un rectangulo de identificación para la cara y extrae dicha parte de la imagen
     if cartoonish:    
         for (x,y,h,k) in face:
      
-            #Se crea un arreglo de ceros del mismo tamaño que la imagen original
+            # Se crea un arreglo de ceros del mismo tamaño que la imagen original
             numpy_array = np.zeros(img.shape)
 
-            #Se caricaturiza la imagen original y se toma la sección de la cara
-            #(para usarla como filtro)
+            # Se caricaturiza la imagen original y se toma la sección de la cara
+            # (para usarla como filtro)
 
             cartoon = car.cartoonize(img, img_blur, img_colork, img_lsize)
             cropped_image = cartoon[y:(y+k),x:(x+h)]
 
-            #Se introduce dicha sección en el arreglo (en su posición original) 
-            #para poder realizar operaciones matriciales
+            # Se introduce dicha sección en el arreglo (en su posición original) 
+            # para poder realizar operaciones matriciales
             numpy_array[y:y+k, x: x+ h] = cropped_image
             numpy_array = numpy_array.astype(np.uint8)
         
@@ -155,11 +156,20 @@ def face_detection(img: cv.Mat, img_blur, img_lsize, img_colork, cartoonish: boo
     return img
 
 # Colocando todo el proceso junto para integrarlo a la interfaz
-def warping_mediapipe(img_input:str, output_path,size = (360,480), blur= 5, colors= 8,img_lsize = 11, cartoonish = True):
+def warping_mediapipe(img_input:str, output_path, blur= 5, colors= 8,img_lsize = 11, cartoonish = True):
     img = image_manager(img_input)
     landmarked_image = landmark_startup(img[0], False, False, False, False)
     warped_image = face_detection(landmarked_image, blur, img_lsize, colors, cartoonish)
     resized_image = cv.resize(warped_image,(img[1][1],img[1][0]))
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    cv.imwrite(output_path, resized_image)
+    return output_path
+
+# Colocando todo el proceso junto para integrarlo a la interfaz
+def warping_dlib(img_input:str, output_path):
+    img = image_manager(img_input)
+    landmarked_and_warped_image = extract_landmarks_dlib(img[0])
+    resized_image = cv.resize(landmarked_and_warped_image,(img[1][1],img[1][0]))
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     cv.imwrite(output_path, resized_image)
     return output_path
