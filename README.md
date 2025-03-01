@@ -26,7 +26,7 @@ El programa se compone de varios módulos, cada uno con una función específica
 - Modifica las coordenadas de los landmarks para enfatizar características distintivas como ojos, nariz y boca.
 
 ### 5. Transformaciones Geométricas
-- Aplica triangulación de Delaunay y técnicas de warping para modificar la imagen basada en los landmarks ajustados.
+- Aplica triangulación de Delaunay para modificar la imagen basada en los landmarks ajustados.
 
 ### 6. Aplicación de Efectos Visuales
 - Utiliza filtros artísticos para dar un acabado más caricaturesco.
