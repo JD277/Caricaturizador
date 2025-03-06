@@ -1,7 +1,7 @@
 import cv2
 import dlib
 import numpy as np
-from modules.Warping.Caricature import cartoonize
+from modules.Clustering.Caricature import cartoonize
 # Función para extraer landmarks y aplicar el filtro al rostro
 def extract_landmarks_dlib(image):
     # Convierte la imagen a escala de grises

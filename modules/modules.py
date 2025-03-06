@@ -18,7 +18,7 @@ cartoonizer = Cartoonizer(model_path="modules/GANcartoonizer/saved_models")
 from modules.visualeffects.applyVisualeffects import apply_effects
 
 # Warping MP stuff
-from modules.Warping.Warping import warping_mediapipe
+from modules.Clustering.Clustering import warping_mediapipe
 
 # Warping Dlib stuff
-from modules.Warping.Warping import warping_dlib
+from modules.Clustering.Clustering import warping_dlib

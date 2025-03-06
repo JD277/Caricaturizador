@@ -94,7 +94,7 @@ def draw_points(rgb_image: mp.Image, configuration, draw_face= True, draw_eyes_m
 # y crea un landmark (como un análisis de las caras)
 def landmark_startup(og: cv.Mat, face: bool, eyes: bool, iris: bool, nose: bool):
 
-    model = "modules/Warping/face_landmarker.task"
+    model = "modules/Clustering/face_landmarker.task"
 
     # Variables que se utilizan para asignarle a la configuración del landmark
     mp_base = tk.BaseOptions(model_asset_path= model)
