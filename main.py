@@ -1,5 +1,5 @@
 from modules.modules import *
-
+import cv2 as cv
 # Función para inicializar 
 def initialize_state():
     if 'imagen_cargada' not in st.session_state:
@@ -22,14 +22,14 @@ def mostrar_progreso(progress_bar):
 # Caricaturización con Mediapipe 
 def warping_con_mediapipe(imagen):
     # Aqui va el codigo para esta funcion
-    img_name = f"images/cartoon{datetime.now()}.jpg"
+    img_name = f"images/cartoon{datetime.now().strftime("%d_%m_%Y, %H_%M_%S")}.jpg"
     warping_mediapipe(imagen,img_name)
     return img_name
 
 # Método de Deep Learning 
 def metodo_deep_learning(imagen):
     # Aquí va el codigo para esta funcion
-    img_name = f"images/cartoon{datetime.now()}.jpg"
+    img_name = f"images/cartoon{datetime.now().strftime("%d_%m_%Y, %H_%M_%S")}.jpg"
     cartoonizer.cartoonize(imagen, img_name)
     return img_name
 
@@ -41,13 +41,13 @@ def caricaturizar_imagen(imagen, metodo):
     if metodo == 'Caricaturización con Mediapipe':
         return warping_con_mediapipe(imagen)
     elif metodo == 'Caricaturización con Dlib':
-        return warping_dlib(imagen, f"images/cartoon{datetime.now()}.jpg")
+        return warping_dlib(imagen, f"images/cartoon{datetime.now().strftime("%d_%m_%Y, %H_%M_%S")}.jpg")
     elif metodo == 'AI':
         return metodo_deep_learning(imagen)
     
     elif metodo == 'Realista simple':
         mostrar_progreso(progress_bar)
-        return apply_effects(imagen,f"images/cartoon{datetime.now()}.jpg")
+        return apply_effects(imagen,f"images/cartoon{datetime.now().strftime("%d_%m_%Y, %H_%M_%S")}.jpg")
 
 # Función para limpiar el directorio 'images'
 def limpiar_directorio_images():
@@ -71,7 +71,7 @@ def limpiar_todo():
 
 # Función principal para la interfaz del caricaturizador
 def interfaz_caricaturizador():
-    
+
     st.markdown(
         """
         <style>
@@ -128,6 +128,7 @@ def interfaz_caricaturizador():
 
     # Selección del método de caricaturización
     metodo = st.selectbox('Elige un método:', ['Caricaturización con Mediapipe', 'Caricaturización con Dlib', 'AI', 'Realista simple'])
+    st.write()
 
     if st.session_state.imagen_cargada is not None:
         col1, col2 = st.columns(2)
