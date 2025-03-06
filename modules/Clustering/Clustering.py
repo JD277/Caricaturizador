@@ -5,7 +5,7 @@ import mediapipe as mp
 import os
 import pandas as pd
 from mediapipe import solutions
-import modules.Warping.Caricature as car
+import modules.Clustering.Caricature as car
 from mediapipe.tasks import python as tk
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2 as pb
@@ -128,7 +128,7 @@ def face_detection(img: cv.Mat, img_blur, img_lsize, img_colork, cartoonish: boo
     copy_image= img.copy()
 
     #Detecta el area de la cara
-    classifier = cv.CascadeClassifier("modules/Warping/haarcascade_frontalface_default.xml")
+    classifier = cv.CascadeClassifier("modules/Clustering/haarcascade_frontalface_default.xml")
     face = classifier.detectMultiScale(gray_scale, minSize= (80,80))
     numpy_array = None
     # Crea un rectangulo de identificación para la cara y extrae dicha parte de la imagen
